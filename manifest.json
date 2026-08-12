@@ -1,0 +1,16 @@
+{
+  "name": "html-to-pwa-v8-3-icon-folder-0393",
+  "short_name": "html-to-pwa-",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#050507",
+  "theme_color": "#7928CA",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
