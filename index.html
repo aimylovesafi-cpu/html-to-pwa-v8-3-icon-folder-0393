@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#000000">
+<title>HTML to PWA V8.3 - Icon Folder</title>
+<link rel="manifest" id="manifestLink">
+<link rel="apple-touch-icon" id="appleIcon" href="">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#FFFF33;font-family:-apple-system,sans-serif;display:flex;justify-content:center;min-height:100vh}
+.container{width:92%;max-width:460px;padding:20px 0 40px;text-align:center}
+h1{font-size:1.5rem;font-weight:900;text-shadow:0 0 10px #FFFF33}
+.sub{font-size:10px;color:#666;letter-spacing:2px;margin:6px 0 18px}
+.card{background:#;border:1px solid #222;border-radius:18px;padding:14px;margin:12px 0;text-align:left}
+.label{font-size:10px;color:#FFFF66;font-weight:800;margin-bottom:8px;display:block}
+.upload{border:2px dashed #FFFF33;border-radius:14px;padding:18px;text-align:center;background:rgba(255,255,51,0.05);cursor:pointer;margin-bottom:10px}
+.upload.icon{border-color:#00FFFF;background:rgba(0,255,255,0.05)}
+.btn{width:100%;background:linear-gradient(135deg,#FFFF00,#FFCC00);color:#000;border:none;padding:13px;border-radius:40px;font-weight:900;margin:8px 0;cursor:pointer}
+.btn:disabled{opacity:0.25}
+.btn-preview{background:linear-gradient(135deg,#00FF99,#00CCFF)!important;display:none}
+.status{font-size:11px;color:#aaa;margin-top:8px;line-height:14px;word-break:break-all}
+.preview-img{width:70px;height:70px;border-radius:16px;object-fit:cover;border:2px solid #00FFFF;display:none;margin:10px auto}
+.input-icon{width:100%;background:#111;border:1px solid #333;color:#0f0;border-radius:8px;padding:10px;font-size:12px;margin-top:8px}
+</style>
+<script>
+(function(){
+ const p=new URLSearchParams(location.search);
+ if(p.get('app')==='1'){
+ let code='';
+ try{
+ const h=location.hash.slice(1);
+ if(h){let b64=h.replace(/-/g,'+').replace(/_/g,'/');while(b64.length%4)b64+='=';code=decodeURIComponent(escape(atob(b64)));try{localStorage.setItem('V8_OFFLINE_CODE',code);}catch(e){}}
+ else{code=localStorage.getItem('V8_OFFLINE_CODE')||'';}
+ if(code){document.open();document.write(code);document.close();window.stop();return;}
+ }catch(e){}
+ const b=localStorage.getItem('V8_OFFLINE_CODE'); if(b){document.open();document.write(b);document.close();window.stop();return;}
+ }
+})();
+</script>
+</head>
+<body>
+<div class="container">
+<h1>HTML → PWA V8.3</h1>
+<div class="sub">ICON FOLDER + INJECTED INTO APP</div>
+
+<div class="card">
+<span class="label">STEP 1 - YOUR HTML FILE</span>
+<div class="upload" id="uploadBox"><div>📁</div><div style="font-size:11px;font-weight:800">SELECT HOUSE INFINITE HTML</div></div>
+<input type="file" id="fileInput" accept=".html,.htm,.txt" style="display:none">
+<div id="fileName" style="font-size:11px;color:#FFFF33;margin-top:6px">No file</div>
+</div>
+
+<div class="card">
+<span class="label">STEP 2 - ICON (2 OPTIONS)</span>
+<div class="upload icon" id="iconBox"><div>🖼️</div><div style="font-size:11px;font-weight:800">OPTION A: UPLOAD ICON (PNG/JPG)</div></div>
+<input type="file" id="iconInput" accept="image/*" style="display:none">
+<img id="iconPreview" class="preview-img">
+<div style="text-align:center;margin:10px 0;color:#666;font-size:10px">— OR —</div>
+<span class="label" style="color:#00FFFF">OPTION B: USE FROM icons/ FOLDER (BEST FOR iOS)</span>
+<input type="text" id="iconPathInput" class="input-icon" placeholder="./icons/house.png (create icons folder in Render)">
+<div id="iconName" style="font-size:10px;color:#00FFFF;text-align:center;margin-top:6px">No icon yet</div>
+<div style="font-size:9px;color:#888;margin-top:8px;line-height:13px">
+<b>Best way:</b> In your Render repo create folder <b>icons/</b> and put your icons there (house.png, music.png...). Then type <b>./icons/house.png</b> above. This way icon is a real file and iOS loads it 100% offline!
+</div>
+</div>
+
+<div class="card">
+<span class="label">STEP 3 - BUILD</span>
+<button class="btn" id="buildBtn" disabled>🔨 BUILD WITH ICON INJECTED</button>
+<button class="btn btn-preview" id="openBtn">🚀 OPEN APP (ICON INSIDE)</button>
+<div class="status" id="status">Select HTML first</div>
+</div>
+</div>
+
+<script>
+let userCode='', baseName='house-infinite', finalUrl='', iconDataUrl='', iconRealPath='';
+
+const fileInput=document.getElementById('fileInput'), uploadBox=document.getElementById('uploadBox');
+const iconInput=document.getElementById('iconInput'), iconBox=document.getElementById('iconBox');
+const iconPathInput=document.getElementById('iconPathInput');
+
+uploadBox.onclick=()=>fileInput.click();
+iconBox.onclick=()=>iconInput.click();
+
+fileInput.onchange=e=>{
+ const f=e.target.files[0]; if(!f) return;
+ baseName=f.name.replace(/\.[^/.]+$/,'').replace(/[^a-zA-Z0-9-_]/g,'-')||'house-infinite';
+ const r=new FileReader(); r.onload=ev=>{userCode=ev.target.result; document.getElementById('fileName').textContent=`✓ ${f.name} - ${(userCode.length/1024).toFixed(1)}KB`; checkReady();}; r.readAsText(f);
+};
+
+iconInput.onchange=e=>{
+ const f=e.target.files[0]; if(!f) return;
+ const r=new FileReader(); r.onload=ev=>{
+ iconDataUrl=ev.target.result; iconRealPath='';
+ document.getElementById('iconPreview').src=iconDataUrl; document.getElementById('iconPreview').style.display='block';
+ document.getElementById('iconName').textContent=`✓ Custom uploaded: ${f.name}`;
+ iconPathInput.value='';
+ checkReady();
+ }; r.readAsDataURL(f);
+};
+
+iconPathInput.oninput=e=>{
+ const val=e.target.value.trim();
+ if(val){ iconRealPath=val; iconDataUrl=''; document.getElementById('iconPreview').style.display='none'; document.getElementById('iconName').textContent=`✓ Using from folder: ${val}`; checkReady(); }
+};
+
+function checkReady(){ if(userCode) {document.getElementById('buildBtn').disabled=false; document.getElementById('status').textContent='Ready - icon will be injected INSIDE your app';} }
+
+function injectIconIntoHTML(html, iconUrl, name){
+ const iconLink = iconUrl;
+ // Create manifest as data URI
+ const manifestObj={name:name, short_name:name.slice(0,12), display:"standalone", background_color:"#000000", theme_color:"#000000", icons:[{src:iconLink, sizes:"192x192", type:"image/png"},{src:iconLink, sizes:"512x512", type:"image/png"}]};
+ const manifestB64=btoa(JSON.stringify(manifestObj));
+ const manifestDataUri=`data:application/json;base64,${manifestB64}`;
+
+ let injection = `
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="${name}">
+<link rel="apple-touch-icon" href="${iconLink}">
+<link rel="apple-touch-icon" sizes="192x192" href="${iconLink}">
+<link rel="manifest" href="${manifestDataUri}">
+<meta property="og:image" content="${iconLink}">
+`;
+
+ if(html.includes('<head>')) return html.replace('<head>', '<head>'+injection);
+ if(html.includes('<HEAD>')) return html.replace('<HEAD>', '<HEAD>'+injection);
+ return injection + html;
+}
+
+document.getElementById('buildBtn').onclick=()=>{
+ if(!userCode) return;
+ let finalIcon = iconRealPath || iconDataUrl || "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2300FFFF'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='50'>∞</text></svg>";
+
+ // INJECT icon directly into your HOUSE INFINITE code
+ const injectedCode = injectIconIntoHTML(userCode, finalIcon, baseName);
+
+ const b64=btoa(unescape(encodeURIComponent(injectedCode)));
+ const b64url=b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+ finalUrl=location.origin+location.pathname+'?app=1#'+b64url;
+
+ // Update runner manifest too
+ const manifest={name:baseName, short_name:baseName.slice(0,12), display:"standalone", background_color:"#000", theme_color:"#000", start_url:finalUrl, icons:[{src:finalIcon, sizes:"192x192"}, {src:finalIcon, sizes:"512x512"}]};
+ const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+ document.getElementById('manifestLink').href=URL.createObjectURL(blob);
+ document.getElementById('appleIcon').href=finalIcon;
+
+ document.getElementById('openBtn').style.display='block';
+ document.getElementById('status').innerHTML=`✅ Built! Icon injected INSIDE app<br>Final icon: ${finalIcon.slice(0,60)}...<br>Tap OPEN then Add to Home Screen`;
+};
+
+document.getElementById('openBtn').onclick=()=>{ if(finalUrl) window.open(finalUrl,'_blank'); };
+
+const swCode=`const C='v8-3';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./'])).catch(()=>{}));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).catch(()=>c)));});`;
+const swBlob=new Blob([swCode],{type:'text/javascript'});
+if('serviceWorker' in navigator){ navigator.serviceWorker.register(URL.createObjectURL(swBlob),{scope:'./'}).catch(()=>{}); }
+</script>
+</body>
+</html>
